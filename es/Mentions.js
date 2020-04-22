@@ -202,7 +202,7 @@ var Mentions = /*#__PURE__*/function (_React$Component) {
 
     _this.onBlur = function (event) {
       // the timeout causes onBlur to be called async, which causes the react synthetic
-      // event will be nullified. persist it if possible so clients can use it.
+      // event to be nullified. persist it if possible so clients can use it.
       if (event.persist) {
         event.persist();
       }
