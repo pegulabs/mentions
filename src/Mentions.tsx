@@ -239,6 +239,10 @@ class Mentions extends React.Component<MentionsProps, MentionsState> {
       event.persist();
     }
     this.focusId = window.setTimeout(() => {
+      // prevent event from nullifying so client code can still use it
+      if (event.persist) {
+        event.persist();
+      }
       const { onBlur } = this.props;
       this.setState({ isFocus: false });
       this.stopMeasure();
