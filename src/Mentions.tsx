@@ -123,6 +123,11 @@ class Mentions extends React.Component<MentionsProps, MentionsState> {
   public onKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
     const { which } = event;
     const { activeIndex, measuring } = this.state;
+    const { onKeyDown: clientOnKeyDown } = this.props;
+
+    if (clientOnKeyDown) {
+      clientOnKeyDown(event);
+    }
 
     // Skip if not measuring
     if (!measuring) {
@@ -168,13 +173,18 @@ class Mentions extends React.Component<MentionsProps, MentionsState> {
   public onKeyUp: React.KeyboardEventHandler<HTMLTextAreaElement> = (event) => {
     const { key, which } = event;
     const { measureText: prevMeasureText, measuring } = this.state;
-    const { prefix = '', onSearch, validateSearch } = this.props;
+    const { prefix = '', onKeyUp: clientOnKeyUp, onSearch, validateSearch } = this.props;
     const target = event.target as HTMLTextAreaElement;
     const selectionStartText = getBeforeSelectionText(target);
     const { location: measureIndex, prefix: measurePrefix } = getLastMeasureIndex(
       selectionStartText,
       prefix,
     );
+
+    // If the client implements an onKeyUp handler, call it
+    if (clientOnKeyUp) {
+      clientOnKeyUp(event);
+    }
 
     // Skip if match the white key list
     if ([KeyCode.ESC, KeyCode.UP, KeyCode.DOWN, KeyCode.ENTER].indexOf(which) !== -1) {
@@ -247,6 +257,11 @@ class Mentions extends React.Component<MentionsProps, MentionsState> {
   };
 
   public onBlur = (event?: React.FocusEvent<HTMLTextAreaElement>) => {
+    // the timeout causes onBlur to be called async, which causes the react synthetic
+    // event to be nullified. persist it if possible so clients can use it.
+    if (event && event.persist) {
+      event.persist();
+    }
     this.focusId = window.setTimeout(() => {
       const { onBlur } = this.props;
       this.setState({ isFocus: false });
